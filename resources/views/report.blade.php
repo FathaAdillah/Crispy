@@ -132,7 +132,7 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="tabs-profile-7">
-                                    <h2>Data Kepuasan</h2>
+                                    <h2>Data Harapan</h2>
                                     <div class="table-responsive">
                                         <table class="table">
                                             <thead>

@@ -69,7 +69,7 @@ class ReportController extends Controller
         return view('report', [
             'dataHarapan' => $dataHarapan,
             'dataKepuasan' => $dataKepuasan,
-            'allData' => $allData, // Pastikan variabel allData dikirimkan ke view
+            'allData' => $allData,
             'correlation' => $correlation,
             'alphaHarapan' => $alphaHarapan,
             'alphaKepuasan' => $alphaKepuasan
@@ -89,9 +89,9 @@ class ReportController extends Controller
             ];
         }
 
-        // Check if $items is empty or not structured as expected
+
         if (empty($items) || !isset($items[0])) {
-            return 0; // Return a default value or handle error as needed
+            return 0;
         }
 
         $k = count($items[0]);
@@ -106,29 +106,28 @@ class ReportController extends Controller
 
     private function hitungKorelasi($data)
     {
-        // Inisialisasi array untuk hasil korelasi
+
         $correlation = [];
 
-        // Pastikan $data tidak kosong sebelum dilanjutkan
+
         if ($data->isEmpty()) {
-            return $correlation; // Kembalikan array kosong jika $data kosong
+            return $correlation;
         }
 
-        // Looping untuk setiap variabel jawaban (jawaban1 sampai jawaban5)
         for ($i = 1; $i <= 5; $i++) {
-            // Hitung rata-rata jawaban
+
             $mean = $data->avg("jawaban$i");
 
-            // Hitung kovariansi
+
             $covariance = $this->hitungCovariance($data, "jawaban$i");
 
-            // Hitung koefisien korelasi Pearson
+
             $stddev = $this->hitungStdDeviation($data, "jawaban$i");
 
-            // Handle division by zero
+
             if ($stddev == 0) {
-                // Assign default value or handle the error as needed
-                $correlation["pearson_corr_jawaban$i"] = 0; // Set to zero or handle differently
+
+                $correlation["pearson_corr_jawaban$i"] = 0;
             } else {
                 $pearsonCorrelation = $covariance / ($stddev * $stddev);
                 $correlation["pearson_corr_jawaban$i"] = $pearsonCorrelation;
@@ -161,11 +160,10 @@ class ReportController extends Controller
 
         $stddev = sqrt($variance / count($data));
 
-        // Handle division by zero
+
         if ($stddev == 0) {
-            // Assign default value or handle the error as needed
-            $stddev = 0.001; // Set to a small non-zero value
-            // You can also throw an exception or handle error message here
+
+            $stddev = 0.001;
         }
 
         return $stddev;
