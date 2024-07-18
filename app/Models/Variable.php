@@ -13,9 +13,13 @@ class Variable extends Model
 
     protected $table = 'avariable';
 
-    protected $fillabel = [
+    protected $fillable = [
         'name',
+        'is_delete',
+        'is_active',
     ];
+
+    public $timestamps = false;
 
     public function questions()
     {

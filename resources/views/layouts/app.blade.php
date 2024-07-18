@@ -13,6 +13,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    {{-- <meta name="csrf-token" content="{{ csrf_token() }}"> --}}
     <title>@yield('title') - Kuisioner</title>
     <!-- CSS files -->
     <link href="./css/tabler.min.css?1692870487" rel="stylesheet" />
@@ -53,6 +54,8 @@
 
 <body>
     <script src="./js/demo-theme.min.js?1692870487"></script>
+    {{-- @include('layouts.alert-success')
+    @include('layouts.alert-fail') --}}
     <div class="page">
         <!-- Navbar Atas-->
         @include('components.header-up')
@@ -92,6 +95,7 @@
 
     <!-- Custom Scripts -->
     @stack('scripts')
+
 </body>
 
 </html>
