@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Variable;
 use App\Models\Kuisioner;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -13,11 +14,14 @@ class PertanyaanController extends Controller
     {
         try {
             if ($request->ajax()) {
-                $kuisioner = Kuisioner::with('variable')->select('aquestion.*');
+                $kuisioner = Kuisioner::where('is_active', 1)
+                    ->where('is_delete', 0)
+                    ->with('variable')
+                    ->select('aquestion.*');
 
                 return DataTables::of($kuisioner)
                     ->addColumn('variable', function ($kuisioner) {
-                        return $kuisioner->variable->name; // Assuming variable has a 'name' attribute
+                        return $kuisioner->variable->name;
                     })
                     ->addColumn('action', function ($kuisioner) {
                         $Button = "<button class='btn btn-primary btn-edit' data-id='" . $kuisioner->id . "'><i class='fas fa-edit'></i></button>";
@@ -31,6 +35,75 @@ class PertanyaanController extends Controller
             Log::error('Error fetching data: ' . $e->getMessage());
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
-        return view('pertanyaan');
+
+        $variables = Variable::where('is_active', 1)->where('is_delete', 0)->get();
+
+        return view('pertanyaan', compact('variables'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'question' => 'required|string|max:255',
+            'variable_id' => 'required|exists:avariable,id',
+        ]);
+
+        try {
+            Kuisioner::create([
+                'question' => $request->question,
+                'variable_id' => $request->variable_id,
+                'is_active' => 1,
+                'is_delete' => 0,
+            ]);
+            return response()->json(['success' => 'Questionnaire created successfully']);
+        } catch (\Exception $e) {
+            Log::error('Error creating questionnaire: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    }
+
+    public function show($id)
+    {
+        try {
+            $kuisioner = Kuisioner::findOrFail($id);
+            return response()->json($kuisioner);
+        } catch (\Exception $e) {
+            Log::error('Error fetching questionnaire: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'question' => 'required|string|max:255',
+            'variable_id' => 'required|exists:variables,id',
+        ]);
+
+        try {
+            $kuisioner = Kuisioner::findOrFail($id);
+            $kuisioner->update([
+                'question' => $request->question,
+                'variable_id' => $request->variable_id,
+            ]);
+            return response()->json(['success' => 'Questionnaire updated successfully']);
+        } catch (\Exception $e) {
+            Log::error('Error updating questionnaire: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $kuisioner = Kuisioner::findOrFail($id);
+            $kuisioner->update([
+                'is_delete' => 1,
+            ]);
+            return response()->json(['success' => 'Questionnaire deleted successfully']);
+        } catch (\Exception $e) {
+            Log::error('Error deleting questionnaire: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     }
 }

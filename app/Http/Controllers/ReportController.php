@@ -103,7 +103,6 @@ class ReportController extends Controller
         return $alpha;
     }
 
-
     private function hitungKorelasi($data)
     {
 
