@@ -13,14 +13,14 @@
                     aria-label="Open user menu">
                     <span class="avatar avatar-sm" style=""></span>
                     <div class="d-none d-xl-block ps-2">
-                        <div>Nama User</div>
+                        <div>{{ auth()->user()->name }}</div>
                         <div class="mt-1 small text-secondary">Administrator</div>
                     </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <a href="#" class="dropdown-item has-icon text-danger"
+                    <a href="#" class="dropdown-item text-danger"
                         onclick="event.preventDefault(); document.getElementById('logout-form').submit()">
-                        <i class="fas fa-sign-out-alt">Logout</i> 
+                        <i class="fas fa-sign-out-alt"></i> Logout
                     </a>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                         @csrf
