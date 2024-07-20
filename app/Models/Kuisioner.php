@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Laravel\Sanctum\HasApiTokens;
+use App\Models\Code;
 use App\Models\Variable;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Kuisioner extends Model
 {
@@ -15,6 +16,7 @@ class Kuisioner extends Model
 
     protected $fillable = [
         'question',
+        'code_id',
         'variable_id',
         'created_at',
         'user_create',
@@ -23,5 +25,9 @@ class Kuisioner extends Model
     public function variable()
     {
         return $this->belongsTo(Variable::class, 'variable_id');
+    }
+    public function code()
+    {
+        return $this->belongsTo(Code::class, 'code_id');
     }
 }

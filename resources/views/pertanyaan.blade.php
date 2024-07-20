@@ -45,6 +45,7 @@
                                     <thead>
                                         <th>No</th>
                                         <th>Pertanyaan</th>
+                                        <th>Code</th>
                                         <th>Variable</th>
                                         <th>Action</th>
                                     </thead>
@@ -70,6 +71,15 @@
                         <div class="mb-3">
                             <label class="form-label" for="question">Question</label>
                             <input type="text" class="form-control" name="question" placeholder="Your question" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="code_id">Code</label>
+                            <select class="form-control" name="code_id" required>
+                                <option value="" selected disabled>Pilih Code</option>
+                                @foreach ($codes as $code)
+                                    <option value="{{ $code->id }}">{{ $code->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="variable_id">Variable</label>
@@ -107,6 +117,15 @@
                             <label class="form-label" for="edit-question">Question</label>
                             <input type="text" class="form-control" id="edit-question" name="question"
                                 placeholder="Your question" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="edit-code_id">Variable</label>
+                            <select class="form-control" id="edit-code_id" name="code_id" required>
+                                <option value="" selected disabled>Pilih Code</option>
+                                @foreach ($codes as $code)
+                                    <option value="{{ $code->id }}">{{ $code->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label" for="edit-variable_id">Variable</label>
@@ -147,6 +166,10 @@
                         name: 'question'
                     },
                     {
+                        data: 'code',
+                        name: 'code'
+                    },
+                    {
                         data: 'variable',
                         name: 'variable'
                     },
@@ -182,6 +205,7 @@
                 $.get('/pertanyaan/' + id, function(data) {
                     $('#edit-id').val(data.id);
                     $('#edit-question').val(data.question);
+                    $('#edit-code_id').val(data.variable_id);
                     $('#edit-variable_id').val(data.variable_id);
                     $('#modal-edit').modal('show');
                 });

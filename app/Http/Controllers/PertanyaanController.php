@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Code;
 use App\Models\Variable;
 use App\Models\Kuisioner;
 use Illuminate\Http\Request;
@@ -16,12 +17,16 @@ class PertanyaanController extends Controller
             if ($request->ajax()) {
                 $kuisioner = Kuisioner::where('is_active', 1)
                     ->where('is_delete', 0)
+                    ->with('code')
                     ->with('variable')
                     ->select('aquestion.*');
 
                 return DataTables::of($kuisioner)
                     ->addColumn('variable', function ($kuisioner) {
                         return $kuisioner->variable->name;
+                    })
+                    ->addColumn('code', function ($kuisioner) {
+                        return $kuisioner->code->name;
                     })
                     ->addColumn('action', function ($kuisioner) {
                         $Button = "<button class='btn btn-primary btn-edit' data-id='" . $kuisioner->id . "'><i class='fas fa-edit'></i></button>";
@@ -37,20 +42,23 @@ class PertanyaanController extends Controller
         }
 
         $variables = Variable::where('is_active', 1)->where('is_delete', 0)->get();
+        $codes = Code::where('is_active', 1)->where('is_delete', 0)->get();
 
-        return view('pertanyaan', compact('variables'));
+        return view('pertanyaan', compact('variables', 'codes'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'question' => 'required|string|max:255',
+            'code_id' => 'required|exists:acode,id',
             'variable_id' => 'required|exists:avariable,id',
         ]);
 
         try {
             Kuisioner::create([
                 'question' => $request->question,
+                'code_id' => $request->code_id,
                 'variable_id' => $request->variable_id,
                 'is_active' => 1,
                 'is_delete' => 0,
@@ -77,6 +85,7 @@ class PertanyaanController extends Controller
     {
         $request->validate([
             'question' => 'required|string|max:255',
+            'code_id' => 'required|exists:acode,id',
             'variable_id' => 'required|exists:variables,id',
         ]);
 
@@ -84,6 +93,7 @@ class PertanyaanController extends Controller
             $kuisioner = Kuisioner::findOrFail($id);
             $kuisioner->update([
                 'question' => $request->question,
+                'code_id' => $request->code_id,
                 'variable_id' => $request->variable_id,
             ]);
             return response()->json(['success' => 'Questionnaire updated successfully']);

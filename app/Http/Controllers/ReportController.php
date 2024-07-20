@@ -25,11 +25,14 @@ class ReportController extends Controller
                 'ah.jawaban3',
                 'ah.jawaban4',
                 'ah.jawaban5',
-                'ah.responden_id'
+                'ah.responden_id',
+                'q.code_id',
+                'ac.name as code_name'
             )
             ->join('aquestion as q', 'ah.question_id', '=', 'q.id')
             ->join('acategory as c', 'ah.category_id', '=', 'c.id')
             ->join('avariable as v', 'q.variable_id', '=', 'v.id')
+            ->join('acode as ac', 'q.code_id', '=', 'ac.id')
             ->get();
 
         // Query untuk mengambil data jawaban kepuasan
@@ -47,11 +50,14 @@ class ReportController extends Controller
                 'ak.jawaban3',
                 'ak.jawaban4',
                 'ak.jawaban5',
-                'ak.responden_id'
+                'ak.responden_id',
+                'q.code_id',
+                'ac.name as code_name'
             )
             ->join('aquestion as q', 'ak.question_id', '=', 'q.id')
             ->join('acategory as c', 'ak.category_id', '=', 'c.id')
             ->join('avariable as v', 'q.variable_id', '=', 'v.id')
+            ->join('acode as ac', 'q.code_id', '=', 'ac.id')
             ->get();
 
         // Gabungkan dataHarapan dan dataKepuasan ke dalam satu array besar
@@ -64,6 +70,18 @@ class ReportController extends Controller
         $alphaHarapan = $this->cronbachAlpha($dataHarapan);
         $alphaKepuasan = $this->cronbachAlpha($dataKepuasan);
 
+        // Hitung CSI per variable
+        $csiPerVariable = $this->hitungCSI($dataHarapan, $dataKepuasan);
+
+        // Hitung total CSI hanya jika terdapat elemen dalam $csiPerVariable
+        if (count($csiPerVariable) > 0) {
+            $totalCSI = array_sum(array_column($csiPerVariable, 'csi')) / count($csiPerVariable);
+        } else {
+            $totalCSI = 0;
+        }
+
+        // Hitung PIECES
+        $piecesPerCode = $this->hitungPIECES($dataHarapan, $dataKepuasan);
 
         // Tampilkan hasil dalam view
         return view('report', [
@@ -72,7 +90,10 @@ class ReportController extends Controller
             'allData' => $allData,
             'correlation' => $correlation,
             'alphaHarapan' => $alphaHarapan,
-            'alphaKepuasan' => $alphaKepuasan
+            'alphaKepuasan' => $alphaKepuasan,
+            'csiPerVariable' => $csiPerVariable,
+            'totalCSI' => round($totalCSI, 2),
+            'piecesPerCode' => $piecesPerCode
         ]);
     }
 
@@ -166,5 +187,108 @@ class ReportController extends Controller
         }
 
         return $stddev;
+    }
+
+
+    private function hitungCSI($dataHarapan, $dataKepuasan)
+    {
+        $csiPerVariable = [];
+
+        // Group data by variable
+        $groupedHarapan = $dataHarapan->groupBy('variable_id');
+        $groupedKepuasan = $dataKepuasan->groupBy('variable_id');
+
+        foreach ($groupedHarapan as $variableId => $harapanData) {
+            if (isset($groupedKepuasan[$variableId])) {
+                $kepuasanData = $groupedKepuasan[$variableId];
+
+                $totalHarapan = $harapanData->count() * 5; // Assuming each question has 5 answers
+                $totalKepuasan = $kepuasanData->count() * 5;
+
+                $sumHarapan = $harapanData->sum(function ($item) {
+                    return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
+                });
+
+                $sumKepuasan = $kepuasanData->sum(function ($item) {
+                    return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
+                });
+
+                // Cek untuk menghindari pembagian dengan nol
+                if ($totalHarapan == 0 || $totalKepuasan == 0) {
+                    continue;
+                }
+
+                $meanHarapan = $sumHarapan / $totalHarapan;
+                $meanKepuasan = $sumKepuasan / $totalKepuasan;
+
+                // Cek untuk menghindari pembagian dengan nol
+                if ($meanHarapan + $meanKepuasan == 0) {
+                    continue;
+                }
+
+                $wf = $meanHarapan / ($meanHarapan + $meanKepuasan);
+                $ws = $meanKepuasan / ($meanHarapan + $meanKepuasan);
+
+                // Cek untuk menghindari pembagian dengan nol
+                $csi = $meanHarapan != 0 ? round(($meanKepuasan / $meanHarapan) * 100, 2) : 0;
+
+                $csiPerVariable[] = [
+                    'variable_id' => $variableId,
+                    'variable_name' => $harapanData->first()->variable_name,
+                    'mis' => round($meanHarapan, 2),
+                    'mss' => round($meanKepuasan, 2),
+                    'wf' => round($wf, 2),
+                    'ws' => round($ws, 2),
+                    'csi' => $csi
+                ];
+            }
+        }
+
+        return $csiPerVariable;
+    }
+
+    private function hitungPIECES($dataHarapan, $dataKepuasan)
+    {
+        $piecesPerCode = [];
+
+        // Group data by variable and code_id
+        $groupedHarapan = $dataHarapan->groupBy(['variable_name', 'code_id']);
+        $groupedKepuasan = $dataKepuasan->groupBy(['variable_name', 'code_id']);
+
+        foreach ($groupedHarapan as $variableName => $codeGroups) {
+            foreach ($codeGroups as $codeId => $harapanData) {
+                if (isset($groupedKepuasan[$variableName][$codeId])) {
+                    $kepuasanData = $groupedKepuasan[$variableName][$codeId];
+
+                    $totalHarapan = $harapanData->count() * 5; // Assuming each question has 5 answers
+                    $totalKepuasan = $kepuasanData->count() * 5;
+
+                    $sumHarapan = $harapanData->sum(function ($item) {
+                        return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
+                    });
+
+                    $sumKepuasan = $kepuasanData->sum(function ($item) {
+                        return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
+                    });
+
+                    // Cek untuk menghindari pembagian dengan nol
+                    if ($totalHarapan == 0 || $totalKepuasan == 0) {
+                        continue;
+                    }
+
+                    $meanHarapan = $sumHarapan / $totalHarapan;
+                    $meanKepuasan = $sumKepuasan / $totalKepuasan;
+
+                    $piecesPerCode[] = [
+                        'variable_name' => $variableName,
+                        'code_name' => $harapanData->first()->code_name,
+                        'mean_harapan' => round($meanHarapan, 2),
+                        'mean_kepuasan' => round($meanKepuasan, 2)
+                    ];
+                }
+            }
+        }
+
+        return $piecesPerCode;
     }
 }

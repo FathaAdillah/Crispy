@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CodeController;
 use App\Http\Controllers\KuisionerController;
 use App\Http\Controllers\PertanyaanController;
 use App\Http\Controllers\ReportController;
@@ -24,4 +25,5 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::resource('variable', VariableController::class);
     Route::resource('responden', RespondenController::class);
     Route::resource('report', ReportController::class);
+    Route::resource('code', CodeController::class);
 });

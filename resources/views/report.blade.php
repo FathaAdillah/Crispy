@@ -218,18 +218,58 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="tabs-activity-7">
-                                    <h4>Activity tab</h4>
-                                    <div>Donec ac vitae diam amet vel leo egestas consequat rhoncus in luctus amet,
-                                        facilisi
-                                        sit mauris accumsan nibh habitant senectus</div>
+                                    <h2>Customer Satisfaction Index (CSI) per Variable</h2>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Variable Name</th>
+                                                    <th>MIS</th>
+                                                    <th>MSS</th>
+                                                    <th>WF</th>
+                                                    <th>WS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($csiPerVariable as $csi)
+                                                    <tr>
+                                                        <td>{{ $csi['variable_name'] }}</td>
+                                                        <td>{{ $csi['mis'] }}</td>
+                                                        <td>{{ $csi['mss'] }}</td>
+                                                        <td>{{ $csi['wf'] }}</td>
+                                                        <td>{{ $csi['ws'] }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <br>
+                                    <h3>Total CSI: {{ $totalCSI }}</h3>
+                                    <br>
                                 </div>
                                 <div class="tab-pane" id="tabs-activity-8">
-                                    <h4>Activity tab</h4>
-                                    <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                                        Lorem
-                                        Ipsum has been the industry's standard dummy text ever since the 1500s, when an
-                                        unknown printer took a galley of type and scrambled it to make a type specimen
-                                        book.
+                                    <h2>PIECES Per Code</h2>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Variable</th>
+                                                    <th>Code</th>
+                                                    <th>Mean Harapan</th>
+                                                    <th>Mean Kepuasan</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($piecesPerCode as $pieces)
+                                                    <tr>
+                                                        <td>{{ $pieces['variable_name'] }}</td>
+                                                        <td>{{ $pieces['code_name'] }}</td>
+                                                        <td>{{ $pieces['mean_harapan'] }}</td>
+                                                        <td>{{ $pieces['mean_kepuasan'] }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -238,32 +278,31 @@
                 </div>
             </div>
         </div>
-    </div>
-@endsection
+    @endsection
 
-@push('scripts')
-    <script type="text/javascript">
-        $(function() {
-            var table = $('#variable-table').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: '/variable',
-                columns: [{
-                        data: 'id',
-                        name: 'id'
-                    },
-                    {
-                        data: 'name',
-                        name: 'name'
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        orderable: false,
-                        searchable: false
-                    }
-                ]
+    @push('scripts')
+        <script type="text/javascript">
+            $(function() {
+                var table = $('#variable-table').DataTable({
+                    processing: true,
+                    serverSide: true,
+                    ajax: '/variable',
+                    columns: [{
+                            data: 'id',
+                            name: 'id'
+                        },
+                        {
+                            data: 'name',
+                            name: 'name'
+                        },
+                        {
+                            data: 'action',
+                            name: 'action',
+                            orderable: false,
+                            searchable: false
+                        }
+                    ]
+                });
             });
-        });
-    </script>
-@endpush
+        </script>
+    @endpush
