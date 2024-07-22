@@ -86,7 +86,7 @@ class PertanyaanController extends Controller
         $request->validate([
             'question' => 'required|string|max:255',
             'code_id' => 'required|exists:acode,id',
-            'variable_id' => 'required|exists:variables,id',
+            'variable_id' => 'required|exists:avariable,id',
         ]);
 
         try {

@@ -20,6 +20,8 @@ class Kuisioner extends Model
         'variable_id',
         'created_at',
         'user_create',
+        'is_active',
+        'is_delete',
     ];
 
     public function variable()
