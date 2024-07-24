@@ -30,6 +30,7 @@
                                         <th>Email</th>
                                         <th>Pekerjaan</th>
                                         <th>Instansi</th>
+                                        <th>Bukti</th>
                                         <th>Jenis Kelamin</th>
                                         <th>Action</th>
                                     </thead>
@@ -69,6 +70,10 @@
                     {
                         data: 'instansi',
                         name: 'instansi'
+                    },
+                    {
+                        data: 'bukti',
+                        name: 'bukti'
                     },
                     {
                         data: 'jenis_kelamin',

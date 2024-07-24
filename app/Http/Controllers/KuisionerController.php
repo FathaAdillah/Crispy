@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 
+use Nette\Utils\Image;
 use App\Models\Kuisioner;
 use App\Models\Responden;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use App\Models\AnswerHarapan;
 use App\Models\AnswerKepuasan;
+use Illuminate\Support\Facades\Log;
+use Exception;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class KuisionerController extends Controller
 {
@@ -33,7 +37,7 @@ class KuisionerController extends Controller
             'pekerjaanLain' => 'nullable|string',
             'instansi' => 'required|string',
             'jenisKelamin' => 'required|string',
-            'bukti' => 'nullable|string',
+            'bukti' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'responses.*.*' => 'required|in:1,2,3,4,5',
         ]);
 
@@ -46,14 +50,27 @@ class KuisionerController extends Controller
                 $request->pekerjaan = $request->pekerjaanLain;
             }
 
+            $buktiPath = null;
+            if ($request->file('bukti')) {
+                try {
+                    $bukti = $request->file('bukti');
+                    $path = $bukti->store('bukti', 'public');
+                    $buktiPath = $path;
+                } catch (Exception $e) {
+                    Log::error($e->getMessage());
+                    return response('Error', 500);
+                }
+            }
+
             $respondent = Responden::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'pekerjaan' => $request->pekerjaan,
                 'instansi' => $request->instansi,
                 'jenis_kelamin' => $request->jenisKelamin,
-                'bukti' => $request->bukti ?? null,
+                'bukti' => $buktiPath,
             ]);
+            // dd($respondent);
 
             foreach ($request->responses as $questionId => $categories) {
                 foreach ($categories as $categoryId => $value) {
@@ -85,12 +102,12 @@ class KuisionerController extends Controller
                 }
             }
 
-
             return redirect()->back()->with('success', 'Kuisioner berhasil dikirim!');
         } catch (\Exception $e) {
             if (isset($respondent)) {
                 $respondent->delete();
             }
+            Log::error($e->getMessage());
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan kuisioner. Silakan coba lagi.');
         }
     }

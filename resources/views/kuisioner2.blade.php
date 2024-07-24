@@ -200,10 +200,9 @@
                                     <div class="form-section">
                                         <h2>Upload Bukti Pengguna Seabank</h2>
                                         <div class="mb-3">
-                                            <div class="dropzone" id="uploadBukti">
-                                                <div class="dz-message">Drop files here or click to upload.</div>
-                                            </div>
-                                            <input type="hidden" id="buktiPath" name="bukti">
+                                            <input type="file" id="bukti" name="bukti" class="file-input"
+                                                accept="image/*" onchange="readUrl(this, '#img-upload');">
+                                            <img id="img-upload" src="#" alt="your image" hidden />
                                         </div>
                                     </div>
                                     <div class="form-section mt-5">
@@ -276,49 +275,64 @@
 
 
 @push('scripts')
-    {{-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.3/min/dropzone.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const pekerjaanRadios = document.querySelectorAll('input[name="pekerjaan"]');
-            const pekerjaanLainInput = document.getElementById('pekerjaanLain');
+        function readUrl(input, string) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
 
-            pekerjaanRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    if (this.value === 'lain-lain') {
-                        pekerjaanLainInput.disabled = false;
-                    } else {
-                        pekerjaanLainInput.disabled = true;
-                        pekerjaanLainInput.value = '';
-                    }
-                });
-            });
+                reader.onload = function(e) {
+                    $(string).attr('src', e.target.result).width(150).height(70).show();
+                };
 
-            if (document.getElementById('lain-lain').checked) {
-                pekerjaanLainInput.disabled = false;
-            } else {
-                pekerjaanLainInput.disabled = true;
+                reader.readAsDataURL(input.files[0]);
             }
-        });
-
-        Dropzone.autoDiscover = false;
-        var myDropzone = new Dropzone("#uploadBukti", {
-            url: "/file/upload",
-            paramName: "file",
-            maxFilesize: 2, // MB
-            acceptedFiles: ".jpeg,.jpg,.png,.pdf",
-            success: function(file, response) {
-                document.getElementById('buktiPath').value = response.path;
-            }
-        });
+        }
     </script>
+    {{-- <script>
+        Dropzone.autoDiscover = false;
+        var buktiDropzone = new Dropzone("#upload-bukti", {
+            url: "{{ Route('submit-kuisioner') }}", // Use the same URL as the form
+            paramName: "bukti", // The name that will be used to transfer the file
+            maxFiles: 1, // Limit the number of uploaded files to 1
+            addRemoveLinks: true,
+            autoProcessQueue: false, // Prevent Dropzone from auto-submitting the file
+            init: function() {
+                var myDropzone = this;
 
+                // Update the form's submit event to manually handle the file upload
+                document.querySelector("form").addEventListener("submit", function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    myDropzone.processQueue();
+                });
+
+                // Process the form once the file upload is complete
+                this.on("sending", function(file, xhr, formData) {
+                    // Append all form inputs to the formData object
+                    document.querySelectorAll("form input, form select, form textarea").forEach(
+                        function(input) {
+                            formData.append(input.name, input.value);
+                        });
+                });
+
+                this.on("success", function(file, response) {
+                    // Handle the response
+                    window.location.reload();
+                });
+
+                this.on("error", function(file, response) {
+                    // Handle the error
+                    console.log(response);
+                });
+            }
+        });
+    </script> --}}
     <script>
-        // Menampilkan tombol saat scroll ke bawah
         window.addEventListener('scroll', function() {
             var scrollToTopBtn = document.getElementById('scrollToTopBtn');
             if (window.scrollY > 200) { // Menampilkan tombol setelah scroll lebih dari 200px
@@ -328,7 +342,6 @@
             }
         });
 
-        // Fungsi untuk kembali ke atas halaman
         document.getElementById('scrollToTopBtn').addEventListener('click', function() {
             window.scrollTo({
                 top: 0,
