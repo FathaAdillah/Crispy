@@ -70,7 +70,7 @@ class KuisionerController extends Controller
                 'jenis_kelamin' => $request->jenisKelamin,
                 'bukti' => $buktiPath,
             ]);
-            // dd($respondent);
+
 
             foreach ($request->responses as $questionId => $categories) {
                 foreach ($categories as $categoryId => $value) {
@@ -103,7 +103,7 @@ class KuisionerController extends Controller
             }
 
             return redirect()->back()->with('success', 'Kuisioner berhasil dikirim!');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if (isset($respondent)) {
                 $respondent->delete();
             }

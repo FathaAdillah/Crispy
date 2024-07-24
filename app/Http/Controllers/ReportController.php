@@ -110,19 +110,28 @@ class ReportController extends Controller
             ];
         }
 
-
         if (empty($items) || !isset($items[0])) {
             return 0;
         }
 
         $k = count($items[0]);
+        if ($k < 2) {
+            return 0; // Not enough items to calculate alpha
+        }
+
         $itemSum = array_map('array_sum', $items);
         $totalVariance = Descriptive::populationVariance($itemSum);
+
+        if ($totalVariance == 0) {
+            return 0; // Avoid division by zero
+        }
+
         $itemVariances = array_map([Descriptive::class, 'populationVariance'], $items);
 
         $alpha = ($k / ($k - 1)) * (1 - array_sum($itemVariances) / $totalVariance);
         return $alpha;
     }
+
 
     private function hitungKorelasi($data)
     {
@@ -288,7 +297,6 @@ class ReportController extends Controller
                 }
             }
         }
-
         return $piecesPerCode;
     }
 }
