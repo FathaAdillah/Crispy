@@ -85,6 +85,7 @@ class VariableController extends Controller
             $variable = Variable::findOrFail($id);
             $variable->update([
                 'is_delete' => 1,
+                'is_active' =>0,
             ]);
             return response()->json(['success' => 'Variable deleted successfully']);
         } catch (\Exception $e) {

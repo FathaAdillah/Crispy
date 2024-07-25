@@ -85,6 +85,7 @@ class CodeController extends Controller
             $code = Code::findOrFail($id);
             $code->update([
                 'is_delete' => 1,
+                'is_active' => 0,
             ]);
             return response()->json(['success' => 'code deleted successfully']);
         } catch (\Exception $e) {

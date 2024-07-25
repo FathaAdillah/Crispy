@@ -109,6 +109,7 @@ class PertanyaanController extends Controller
             $kuisioner = Kuisioner::findOrFail($id);
             $kuisioner->update([
                 'is_delete' => 1,
+                'is_active' =>0,
             ]);
             return response()->json(['success' => 'Questionnaire deleted successfully']);
         } catch (\Exception $e) {
