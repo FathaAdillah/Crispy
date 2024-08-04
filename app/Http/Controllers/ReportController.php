@@ -63,12 +63,18 @@ class ReportController extends Controller
         // Gabungkan dataHarapan dan dataKepuasan ke dalam satu array besar
         $allData = $dataHarapan->concat($dataKepuasan);
 
-        // Hitung koefisien korelasi Pearson untuk semua data
-        $correlation = $this->hitungKorelasi($allData);
+        // Menghitung Uji Validitas
+        $scoresHarapan = $this->calculateScoresV($dataHarapan);
+        $scoresKepuasan = $this->calculateScoresV($dataKepuasan);
+        $correlations = $this->calculateCorrelation($scoresHarapan, $scoresKepuasan);
 
         // Menghitung Cronbach's Alpha untuk jawaban harapan dan kepuasan
-        $alphaHarapan = $this->cronbachAlpha($dataHarapan);
-        $alphaKepuasan = $this->cronbachAlpha($dataKepuasan);
+        $scoresHarapan = $this->calculateScoresR($dataHarapan);
+        $scoresKepuasan = $this->calculateScoresR($dataKepuasan);
+
+        // Menghitung Cronbach's Alpha
+        $alphaHarapan = $this->calculateCronbachAlphaR($scoresHarapan);
+        $alphaKepuasan = $this->calculateCronbachAlphaR($scoresKepuasan);
 
         // Hitung CSI per variable
         $csiPerVariable = $this->hitungCSI($dataHarapan, $dataKepuasan);
@@ -80,125 +86,169 @@ class ReportController extends Controller
             $totalCSI = 0;
         }
 
-        // Hitung PIECES
-        $piecesPerCode = $this->hitungPIECES($dataHarapan, $dataKepuasan);
+        //Menghitung PIECES Framework
+        $piecesHarapan = $this->calculatePIECES($dataHarapan);
+        $piecesKepuasan = $this->calculatePIECES($dataKepuasan);
 
-        // Tampilkan hasil dalam view
+        // $piecesPerCode = $this->hitungPIECES($dataHarapan, $dataKepuasan);
+
+
         return view('report', [
             'dataHarapan' => $dataHarapan,
             'dataKepuasan' => $dataKepuasan,
             'allData' => $allData,
-            'correlation' => $correlation,
+            'correlations' => $correlations,
             'alphaHarapan' => $alphaHarapan,
             'alphaKepuasan' => $alphaKepuasan,
             'csiPerVariable' => $csiPerVariable,
             'totalCSI' => round($totalCSI, 2),
-            'piecesPerCode' => $piecesPerCode
+            'piecesHarapan' => $piecesHarapan,
+            'piecesKepuasan' => $piecesKepuasan,
+            // 'piecesPerCode' => $piecesPerCode
         ]);
     }
 
-    private function cronbachAlpha($data)
-    {
-        $items = [];
-        foreach ($data as $row) {
-            $items[] = [
-                $row->jawaban1,
-                $row->jawaban2,
-                $row->jawaban3,
-                $row->jawaban4,
-                $row->jawaban5,
-            ];
-        }
 
-        if (empty($items) || !isset($items[0])) {
+    //Function Validitas
+    public function calculateScoresV($data)
+    {
+        $scores = [];
+        foreach ($data as $item) {
+            $respondentId = $item->responden_id;
+            $codeId = $item->code_id;
+            $score = $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
+
+            if (!isset($scores[$respondentId])) {
+                $scores[$respondentId] = [];
+            }
+            if (!isset($scores[$respondentId][$codeId])) {
+                $scores[$respondentId][$codeId] = 0;
+            }
+
+            $scores[$respondentId][$codeId] += $score;
+        }
+        return $scores;
+    }
+
+    public function calculateCorrelation($scoresHarapan, $scoresKepuasan)
+    {
+        $correlations = [];
+        foreach ($scoresHarapan as $respondentId => $codes) {
+            foreach ($codes as $codeId => $scoreHarapan) {
+                if (isset($scoresKepuasan[$respondentId][$codeId])) {
+                    $scoreKepuasan = $scoresKepuasan[$respondentId][$codeId];
+
+                    // Menghitung koefisien korelasi (Pearson correlation coefficient)
+                    $n = count($scoresHarapan);
+                    $sumX = array_sum(array_column($scoresHarapan, $codeId));
+                    $sumY = array_sum(array_column($scoresKepuasan, $codeId));
+                    $sumXY = 0;
+                    $sumX2 = 0;
+                    $sumY2 = 0;
+
+                    foreach ($scoresHarapan as $resId => $codes) {
+                        $x = $codes[$codeId];
+                        $y = $scoresKepuasan[$resId][$codeId];
+                        $sumXY += $x * $y;
+                        $sumX2 += $x * $x;
+                        $sumY2 += $y * $y;
+                    }
+
+                    $numerator = $n * $sumXY - $sumX * $sumY;
+                    $denominator = sqrt(($n * $sumX2 - $sumX * $sumX) * ($n * $sumY2 - $sumY * $sumY));
+                    $correlation = ($denominator != 0) ? $numerator / $denominator : 0;
+
+                    $correlations[$codeId] = $correlation;
+                }
+            }
+        }
+        return $correlations;
+    }
+
+    //Function Uji Reabilitas
+    public function calculateVarianceR($array)
+    {
+        $count = count($array);
+        if ($count === 0) {
             return 0;
         }
 
-        $k = count($items[0]);
-        if ($k < 2) {
-            return 0; // Not enough items to calculate alpha
+        $mean = array_sum($array) / $count;
+        $sumOfSquares = array_reduce($array, function ($carry, $item) use ($mean) {
+            return $carry + pow($item - $mean, 2);
+        }, 0);
+
+        return $count > 1 ? $sumOfSquares / ($count - 1) : 0;
+    }
+
+    public function calculateCronbachAlphaR($data)
+    {
+        if (empty($data)) {
+            return 0; // Atau nilai lain yang sesuai untuk menunjukkan bahwa data kosong
         }
 
-        $itemSum = array_map('array_sum', $items);
-        $totalVariance = Descriptive::populationVariance($itemSum);
+        $firstElement = reset($data);
+        if (!is_array($firstElement) || count($firstElement) === 0) {
+            return 0; // Atau nilai lain yang sesuai untuk menunjukkan bahwa data kosong atau tidak valid
+        }
+
+        $itemCount = count($firstElement);
+        $respondentCount = count($data);
+        $totalVariance = 0;
+        $itemVariances = [];
+
+        // Menghitung varians setiap item
+        for ($i = 0; $i < $itemCount; $i++) {
+            $itemScores = array_column($data, $i);
+            $itemVariance = $this->calculateVarianceR($itemScores);
+            $itemVariances[] = $itemVariance;
+        }
+
+        // Menghitung varians total
+        $totalScores = array_map('array_sum', $data);
+        $totalVariance = $this->calculateVarianceR($totalScores);
 
         if ($totalVariance == 0) {
-            return 0; // Avoid division by zero
+            return 0; // Menghindari pembagian dengan nol
         }
 
-        $itemVariances = array_map([Descriptive::class, 'populationVariance'], $items);
+        // Menghitung Cronbach's Alpha
+        $sumItemVariances = array_sum($itemVariances);
+        $alpha = ($itemCount / ($itemCount - 1)) * (1 - ($sumItemVariances / $totalVariance));
 
-        $alpha = ($k / ($k - 1)) * (1 - array_sum($itemVariances) / $totalVariance);
         return $alpha;
     }
 
-
-    private function hitungKorelasi($data)
+    public function calculateScoresR($data)
     {
+        $scores = [];
+        foreach ($data as $item) {
+            $respondentId = $item->responden_id;
+            $codeId = $item->code_id;
+            $score = $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
 
-        $correlation = [];
-
-
-        if ($data->isEmpty()) {
-            return $correlation;
-        }
-
-        for ($i = 1; $i <= 5; $i++) {
-
-            $mean = $data->avg("jawaban$i");
-
-
-            $covariance = $this->hitungCovariance($data, "jawaban$i");
-
-
-            $stddev = $this->hitungStdDeviation($data, "jawaban$i");
-
-
-            if ($stddev == 0) {
-
-                $correlation["pearson_corr_jawaban$i"] = 0;
-            } else {
-                $pearsonCorrelation = $covariance / ($stddev * $stddev);
-                $correlation["pearson_corr_jawaban$i"] = $pearsonCorrelation;
+            if (!isset($scores[$respondentId])) {
+                $scores[$respondentId] = [];
             }
+            if (!isset($scores[$respondentId][$codeId])) {
+                $scores[$respondentId][$codeId] = 0;
+            }
+
+            $scores[$respondentId][$codeId] += $score;
         }
 
-        return $correlation;
-    }
-
-    private function hitungCovariance($data, $column)
-    {
-        $covariance = 0;
-        $mean = $data->avg($column);
-
-        foreach ($data as $item) {
-            $covariance += ($item->$column - $mean) * ($item->$column - $mean);
+        // Mengubah struktur $scores menjadi array 2 dimensi
+        $flattenedScores = [];
+        foreach ($scores as $respondentScores) {
+            $flattenedScores[] = array_values($respondentScores);
         }
 
-        return $covariance / count($data);
-    }
-
-    private function hitungStdDeviation($data, $column)
-    {
-        $mean = $data->avg($column);
-        $variance = 0;
-
-        foreach ($data as $item) {
-            $variance += pow($item->$column - $mean, 2);
-        }
-
-        $stddev = sqrt($variance / count($data));
-
-
-        if ($stddev == 0) {
-
-            $stddev = 0.001;
-        }
-
-        return $stddev;
+        return $flattenedScores;
     }
 
 
+
+    //Function CSI
     private function hitungCSI($dataHarapan, $dataKepuasan)
     {
         $csiPerVariable = [];
@@ -256,47 +306,99 @@ class ReportController extends Controller
         return $csiPerVariable;
     }
 
-    private function hitungPIECES($dataHarapan, $dataKepuasan)
+    //Function PIECES Framework
+    public function calculatePIECES($data)
     {
-        $piecesPerCode = [];
-
-        // Group data by variable and code_id
-        $groupedHarapan = $dataHarapan->groupBy(['variable_name', 'code_id']);
-        $groupedKepuasan = $dataKepuasan->groupBy(['variable_name', 'code_id']);
-
-        foreach ($groupedHarapan as $variableName => $codeGroups) {
-            foreach ($codeGroups as $codeId => $harapanData) {
-                if (isset($groupedKepuasan[$variableName][$codeId])) {
-                    $kepuasanData = $groupedKepuasan[$variableName][$codeId];
-
-                    $totalHarapan = $harapanData->count() * 5; // Assuming each question has 5 answers
-                    $totalKepuasan = $kepuasanData->count() * 5;
-
-                    $sumHarapan = $harapanData->sum(function ($item) {
-                        return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
-                    });
-
-                    $sumKepuasan = $kepuasanData->sum(function ($item) {
-                        return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
-                    });
-
-                    // Cek untuk menghindari pembagian dengan nol
-                    if ($totalHarapan == 0 || $totalKepuasan == 0) {
-                        continue;
-                    }
-
-                    $meanHarapan = $sumHarapan / $totalHarapan;
-                    $meanKepuasan = $sumKepuasan / $totalKepuasan;
-
-                    $piecesPerCode[] = [
-                        'variable_name' => $variableName,
-                        'code_name' => $harapanData->first()->code_name,
-                        'mean_harapan' => round($meanHarapan, 2),
-                        'mean_kepuasan' => round($meanKepuasan, 2)
-                    ];
-                }
-            }
+        if (empty($data)) {
+            return [
+                'totalSumPerCodeId' => [],
+                'JSK' => [],
+                'RK' => 0,
+                'codeCount' => 0,
+                'codeNames' => []
+            ];
         }
-        return $piecesPerCode;
+
+        // Menghitung total sum per code_id
+        $totalSumPerCodeId = [];
+        $respondentCounts = [];
+        $codeNames = [];
+
+        foreach ($data as $item) {
+            $codeId = $item->code_id;
+            $score = $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
+
+            if (!isset($totalSumPerCodeId[$codeId])) {
+                $totalSumPerCodeId[$codeId] = 0;
+                $respondentCounts[$codeId] = 0;
+                $codeNames[$codeId] = $item->code_name; // Menyimpan nama code_id
+            }
+
+            $totalSumPerCodeId[$codeId] += $score;
+            $respondentCounts[$codeId]++;
+        }
+
+        // Menghitung JSK (Jumlah Skor Kuisioner)
+        $JSK = [];
+        foreach ($totalSumPerCodeId as $codeId => $sum) {
+            $JSK[$codeId] = $sum / $respondentCounts[$codeId];
+        }
+
+        // Menghitung RK
+        $totalJSK = array_sum($JSK);
+        $codeCount = count($totalSumPerCodeId);
+        $RK = $codeCount ? $totalJSK / $codeCount : 0;
+
+        return [
+            'totalSumPerCodeId' => $totalSumPerCodeId,
+            'JSK' => $JSK,
+            'RK' => $RK,
+            'codeCount' => $codeCount,
+            'codeNames' => $codeNames
+        ];
     }
+
+    // private function hitungPIECES($dataHarapan, $dataKepuasan)
+    // {
+    //     $piecesPerCode = [];
+
+    //     // Group data by variable and code_id
+    //     $groupedHarapan = $dataHarapan->groupBy(['variable_name', 'code_id']);
+    //     $groupedKepuasan = $dataKepuasan->groupBy(['variable_name', 'code_id']);
+
+    //     foreach ($groupedHarapan as $variableName => $codeGroups) {
+    //         foreach ($codeGroups as $codeId => $harapanData) {
+    //             if (isset($groupedKepuasan[$variableName][$codeId])) {
+    //                 $kepuasanData = $groupedKepuasan[$variableName][$codeId];
+
+    //                 $totalHarapan = $harapanData->count() * 5; // Assuming each question has 5 answers
+    //                 $totalKepuasan = $kepuasanData->count() * 5;
+
+    //                 $sumHarapan = $harapanData->sum(function ($item) {
+    //                     return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
+    //                 });
+
+    //                 $sumKepuasan = $kepuasanData->sum(function ($item) {
+    //                     return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
+    //                 });
+
+    //                 // Cek untuk menghindari pembagian dengan nol
+    //                 if ($totalHarapan == 0 || $totalKepuasan == 0) {
+    //                     continue;
+    //                 }
+
+    //                 $meanHarapan = $sumHarapan / $totalHarapan;
+    //                 $meanKepuasan = $sumKepuasan / $totalKepuasan;
+
+    //                 $piecesPerCode[] = [
+    //                     'variable_name' => $variableName,
+    //                     'code_name' => $harapanData->first()->code_name,
+    //                     'mean_harapan' => round($meanHarapan, 2),
+    //                     'mean_kepuasan' => round($meanKepuasan, 2)
+    //                 ];
+    //             }
+    //         }
+    //     }
+    //     return $piecesPerCode;
+    // }
 }

@@ -23,16 +23,18 @@
                     <div class="card card-md">
                         <div class="card-body">
                             <div class="table-responsive">
-                                <table class="hover" id="responden-table">
+                                <table class="display nowrap" style="width:100%" id="responden-table">
                                     <thead>
-                                        <th>No</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Pekerjaan</th>
-                                        <th>Instansi</th>
-                                        <th>Bukti</th>
-                                        <th>Jenis Kelamin</th>
-                                        <th>Action</th>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Pekerjaan</th>
+                                            <th>Instansi</th>
+                                            <th>Bukti</th>
+                                            <th>Jenis Kelamin</th>
+                                            <th>Action</th>
+                                        </tr>
                                     </thead>
                                 </table>
                             </div>
@@ -46,14 +48,14 @@
 
 @push('scripts')
     <script type="text/javascript">
-        $(function() {
+        $(document).ready(function() {
             var table = $('#responden-table').DataTable({
                 processing: true,
-                serverSide: true,
+                // serverSide: true,
                 ajax: '/responden',
                 columns: [{
-                        data: 'id',
-                        name: 'id'
+                        data: null,
+                        name: 'sequence'
                     },
                     {
                         data: 'name',
@@ -85,7 +87,34 @@
                         orderable: false,
                         searchable: false
                     }
-                ]
+                ],
+                dom: 'lBfrtip',
+                buttons: [{
+                        extend: 'pdfHtml5',
+                        title: 'Data Responden',
+                        filename: 'responden_pdf',
+                        exportOptions: {
+                            modifier: {
+                                page: 'all'
+                            }
+                        }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        title: 'Data Responden',
+                        filename: 'responden_excel',
+                        exportOptions: {
+                            modifier: {
+                                page: 'all'
+                            }
+                        }
+                    }
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+                    var pageIndex = info.page * info.length + (index + 1);
+                    $('td:eq(0)', row).html(pageIndex);
+                }
             });
         });
     </script>

@@ -1,20 +1,12 @@
 <!doctype html>
-<!--
-* Tabler - Premium and Open Source dashboard template with responsive and high quality UI.
-* @version 1.0.0-beta20
-* @link https://tabler.io
-* Copyright 2018-2023 The Tabler Authors
-* Copyright 2018-2023 codecalm.net Paweł Kuna
-* Licensed under MIT (https://github.com/tabler/tabler/blob/master/LICENSE)
--->
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    {{-- <meta name="csrf-token" content="{{ csrf_token() }}"> --}}
     <title>@yield('title') - Kuisioner</title>
+
     <!-- CSS files -->
     <link href="./css/tabler.min.css?1692870487" rel="stylesheet" />
     <link href="./css/tabler-flags.min.css?1692870487" rel="stylesheet" />
@@ -35,7 +27,6 @@
     <!-- FontAwesome CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
-
     <!-- Custom CSS -->
     @stack('style')
 
@@ -54,8 +45,6 @@
 
 <body>
     <script src="./js/demo-theme.min.js?1692870487"></script>
-    {{-- @include('layouts.alert-success')
-    @include('layouts.alert-fail') --}}
     <div class="page">
         <!-- Navbar Atas-->
         @include('components.header-up')
@@ -92,6 +81,7 @@
     <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
 
     <!-- Custom Scripts -->
     @stack('scripts')

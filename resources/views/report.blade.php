@@ -77,54 +77,25 @@
                                 <div class="tab-pane active show" id="tabs-home-7">
                                     <h4>Uji Validitas</h4>
                                     <div class="table-responsive">
-                                        <table class="table">
+                                        <table class="table table-bordered">
                                             <thead>
                                                 <tr>
-                                                    <th>Answer ID</th>
-                                                    <th>Question Text</th>
-                                                    <th>Variable Name</th>
-                                                    <th>Category Name</th>
-                                                    <th>Jawaban 1</th>
-                                                    <th>Jawaban 2</th>
-                                                    <th>Jawaban 3</th>
-                                                    <th>Jawaban 4</th>
-                                                    <th>Jawaban 5</th>
-                                                    <th>Responden ID</th>
+                                                    <th>Code Name</th>
+                                                    <th>Correlation Coefficient</th>
+                                                    <th>Validity</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($allData as $data)
+                                                @foreach ($correlations as $codeId => $correlation)
+                                                    @php
+                                                        $codeName =
+                                                            $dataHarapan->firstWhere('code_id', $codeId)->code_name ??
+                                                            'Unknown';
+                                                    @endphp
                                                     <tr>
-                                                        <td>{{ $data->answer_id }}</td>
-                                                        <td>{{ $data->question_text }}</td>
-                                                        <td>{{ $data->variable_name }}</td>
-                                                        <td>{{ $data->category_name }}</td>
-                                                        <td>{{ $data->jawaban1 }}</td>
-                                                        <td>{{ $data->jawaban2 }}</td>
-                                                        <td>{{ $data->jawaban3 }}</td>
-                                                        <td>{{ $data->jawaban4 }}</td>
-                                                        <td>{{ $data->jawaban5 }}</td>
-                                                        <td>{{ $data->responden_id }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <br>
-                                    <h2>Koefisien Korelasi Pearson</h2>
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Variable</th>
-                                                    <th>Pearson Correlation</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($correlation as $key => $value)
-                                                    <tr>
-                                                        <td>{{ str_replace('_', ' ', ucfirst($key)) }}</td>
-                                                        <td>{{ $value }}</td>
+                                                        <td>{{ $codeName }}</td>
+                                                        <td>{{ $correlation }}</td>
+                                                        <td>{{ $correlation > 0.195 ? 'Valid' : 'Tidak Valid' }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
@@ -132,90 +103,14 @@
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="tabs-profile-7">
-                                    <h2>Data Harapan</h2>
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Answer ID</th>
-                                                    <th>Question ID</th>
-                                                    <th>Question Text</th>
-                                                    <th>Variable ID</th>
-                                                    <th>Variable Name</th>
-                                                    <th>Category ID</th>
-                                                    <th>Category Name</th>
-                                                    <th>Jawaban1</th>
-                                                    <th>Jawaban2</th>
-                                                    <th>Jawaban3</th>
-                                                    <th>Jawaban4</th>
-                                                    <th>Jawaban5</th>
-                                                    <th>Responden ID</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($dataHarapan as $data)
-                                                    <tr>
-                                                        <td>{{ $data->answer_id }}</td>
-                                                        <td>{{ $data->question_id }}</td>
-                                                        <td>{{ $data->question_text }}</td>
-                                                        <td>{{ $data->variable_id }}</td>
-                                                        <td>{{ $data->variable_name }}</td>
-                                                        <td>{{ $data->category_id }}</td>
-                                                        <td>{{ $data->category_name }}</td>
-                                                        <td>{{ $data->jawaban1 }}</td>
-                                                        <td>{{ $data->jawaban2 }}</td>
-                                                        <td>{{ $data->jawaban3 }}</td>
-                                                        <td>{{ $data->jawaban4 }}</td>
-                                                        <td>{{ $data->jawaban5 }}</td>
-                                                        <td>{{ $data->responden_id }}</td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                        <h4>Cronbach's Alpha Harapan: {{ $alphaHarapan }}</h4>
-                                        <h2>Data Kepuasan</h2>
-                                        <div class="table-responsive">
-                                            <table class="table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Answer ID</th>
-                                                        <th>Question ID</th>
-                                                        <th>Question Text</th>
-                                                        <th>Variable ID</th>
-                                                        <th>Variable Name</th>
-                                                        <th>Category ID</th>
-                                                        <th>Category Name</th>
-                                                        <th>Jawaban1</th>
-                                                        <th>Jawaban2</th>
-                                                        <th>Jawaban3</th>
-                                                        <th>Jawaban4</th>
-                                                        <th>Jawaban5</th>
-                                                        <th>Responden ID</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach ($dataKepuasan as $data)
-                                                        <tr>
-                                                            <td>{{ $data->answer_id }}</td>
-                                                            <td>{{ $data->question_id }}</td>
-                                                            <td>{{ $data->question_text }}</td>
-                                                            <td>{{ $data->variable_id }}</td>
-                                                            <td>{{ $data->variable_name }}</td>
-                                                            <td>{{ $data->category_id }}</td>
-                                                            <td>{{ $data->category_name }}</td>
-                                                            <td>{{ $data->jawaban1 }}</td>
-                                                            <td>{{ $data->jawaban2 }}</td>
-                                                            <td>{{ $data->jawaban3 }}</td>
-                                                            <td>{{ $data->jawaban4 }}</td>
-                                                            <td>{{ $data->jawaban5 }}</td>
-                                                            <td>{{ $data->responden_id }}</td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <h4>Cronbach's Alpha Kepuasan: {{ $alphaKepuasan }}</h4>
-                                    </div>
+                                    <h2>Reliability Testing</h2>
+                                    <h3>Harapan</h3>
+                                    <p>Cronbach's Alpha: {{ $alphaHarapan }}</p>
+                                    <p>Kesimpulan: {{ $alphaHarapan > 0.6 ? 'Reliable' : 'Tidak Reliable' }}</p>
+
+                                    <h3>Kepuasan</h3>
+                                    <p>Cronbach's Alpha: {{ $alphaKepuasan }}</p>
+                                    <p>Kesimpulan: {{ $alphaKepuasan > 0.6 ? 'Reliable' : 'Tidak Reliable' }}</p>
                                 </div>
                                 <div class="tab-pane" id="tabs-activity-7">
                                     <h2>Customer Satisfaction Index (CSI) per Variable</h2>
@@ -248,29 +143,55 @@
                                     <br>
                                 </div>
                                 <div class="tab-pane" id="tabs-activity-8">
-                                    <h2>PIECES Per Code</h2>
+                                    <h2>Harapan</h2>
                                     <div class="table-responsive">
                                         <table class="table">
                                             <thead>
                                                 <tr>
-                                                    <th>Variable</th>
-                                                    <th>Code</th>
-                                                    <th>Mean Harapan</th>
-                                                    <th>Mean Kepuasan</th>
+                                                    <th>Code Name</th>
+                                                    <th>Total Sum per Code</th>
+                                                    <th>JSK</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($piecesPerCode as $pieces)
+                                                @foreach ($piecesHarapan['totalSumPerCodeId'] as $codeId => $totalSum)
                                                     <tr>
-                                                        <td>{{ $pieces['variable_name'] }}</td>
-                                                        <td>{{ $pieces['code_name'] }}</td>
-                                                        <td>{{ $pieces['mean_harapan'] }}</td>
-                                                        <td>{{ $pieces['mean_kepuasan'] }}</td>
+                                                        <td>{{ $piecesHarapan['codeNames'][$codeId] }}</td>
+                                                        <td>{{ $totalSum }}</td>
+                                                        <td>{{ number_format($piecesHarapan['JSK'][$codeId], 2) }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>
                                         </table>
                                     </div>
+                                    <p>RK: {{ number_format($piecesHarapan['RK'], 2) }}</p>
+                                    <p>RK per Code ID:
+                                        {{ number_format($piecesHarapan['RK'] / $piecesHarapan['codeCount'], 2) }}</p>
+
+                                    <h2>Kepuasan</h2>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Code Name</th>
+                                                    <th>Total Sum per Code</th>
+                                                    <th>JSK</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($piecesKepuasan['totalSumPerCodeId'] as $codeId => $totalSum)
+                                                    <tr>
+                                                        <td>{{ $piecesKepuasan['codeNames'][$codeId] }}</td>
+                                                        <td>{{ $totalSum }}</td>
+                                                        <td>{{ number_format($piecesKepuasan['JSK'][$codeId], 2) }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <p>RK: {{ number_format($piecesKepuasan['RK'], 2) }}</p>
+                                    <p>RK per Code ID:
+                                        {{ number_format($piecesKepuasan['RK'] / $piecesKepuasan['codeCount'], 2) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -281,28 +202,4 @@
     @endsection
 
     @push('scripts')
-        <script type="text/javascript">
-            $(function() {
-                var table = $('#variable-table').DataTable({
-                    processing: true,
-                    serverSide: true,
-                    ajax: '/variable',
-                    columns: [{
-                            data: 'id',
-                            name: 'id'
-                        },
-                        {
-                            data: 'name',
-                            name: 'name'
-                        },
-                        {
-                            data: 'action',
-                            name: 'action',
-                            orderable: false,
-                            searchable: false
-                        }
-                    ]
-                });
-            });
-        </script>
     @endpush
