@@ -3,6 +3,27 @@
 @section('title', 'General Dashboard')
 
 @push('style')
+    <style>
+        .custom-excel-button {
+            background-color: #28a745;
+            /* Bootstrap 'success' color */
+            border: 1px solid #28a745;
+            color: white;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 30px;
+            /* Add margin to the right */
+        }
+
+        .custom-excel-button:hover {
+            background-color: #218838;
+            /* Darker shade of 'success' color */
+        }
+    </style>
 @endpush
 
 @section('main')
@@ -90,26 +111,11 @@
                 ],
                 dom: 'lBfrtip',
                 buttons: [{
-                        extend: 'pdfHtml5',
-                        title: 'Data Responden',
-                        filename: 'responden_pdf',
-                        exportOptions: {
-                            modifier: {
-                                page: 'all'
-                            }
-                        }
-                    },
-                    {
-                        extend: 'excelHtml5',
-                        title: 'Data Responden',
-                        filename: 'responden_excel',
-                        exportOptions: {
-                            modifier: {
-                                page: 'all'
-                            }
-                        }
-                    }
-                ],
+                    extend: 'excelHtml5',
+                    title: 'Data Responden',
+                    filename: 'responden_excel',
+                    className: 'custom-excel-button btn-success',
+                }],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     var pageIndex = info.page * info.length + (index + 1);
