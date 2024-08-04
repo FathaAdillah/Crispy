@@ -47,7 +47,7 @@
                                 <table class="display nowrap" style="width:100%" id="responden-table">
                                     <thead>
                                         <tr>
-                                            <th>ID</th>
+                                            <th>No</th>
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Pekerjaan</th>
