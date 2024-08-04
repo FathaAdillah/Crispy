@@ -47,7 +47,7 @@
                                 <table class="display nowrap" style="width:100%" id="responden-table">
                                     <thead>
                                         <tr>
-                                            <th>No</th>
+                                            <th>ID</th>
                                             <th>Name</th>
                                             <th>Email</th>
                                             <th>Pekerjaan</th>
@@ -75,8 +75,8 @@
                 // serverSide: true,
                 ajax: '/responden',
                 columns: [{
-                        data: null,
-                        name: 'sequence'
+                        data: 'id',
+                        name: 'id'
                     },
                     {
                         data: 'name',
@@ -116,11 +116,11 @@
                     filename: 'responden_excel',
                     className: 'custom-excel-button btn-success',
                 }],
-                rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-                    var pageIndex = info.page * info.length + (index + 1);
-                    $('td:eq(0)', row).html(pageIndex);
-                }
+                // rowCallback: function(row, data, index) {
+                //     var info = table.page.info();
+                //     var pageIndex = info.page * info.length + (index + 1);
+                //     $('td:eq(0)', row).html(pageIndex);
+                // }
             });
         });
     </script>
