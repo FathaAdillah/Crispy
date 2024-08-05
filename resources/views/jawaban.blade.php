@@ -15,7 +15,7 @@
                         Overview
                     </div>
                     <h2 class="page-title">
-                       Isi Kuisoner Responden
+                        Isi Kuisoner Responden
                     </h2>
                 </div>
                 <!-- Page title actions -->
@@ -47,8 +47,10 @@
                 serverSide: true,
                 ajax: '/jawaban',
                 columns: [{
-                        data: 'id',
-                        name: 'id'
+                        data: null,
+                        name: 'sequence',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'name',
@@ -60,7 +62,15 @@
                         orderable: false,
                         searchable: false
                     }
-                ]
+                ],
+                order: [
+                    [1, 'asc']
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+                    var pageIndex = info.page * info.length + (index + 1);
+                    $('td:eq(0)', row).html(pageIndex);
+                }
             });
         });
     </script>
