@@ -354,6 +354,7 @@ class ReportController extends Controller
             'JSK' => $JSK,
             'RK' => $RK,
             'codeCount' => $codeCount,
+            'totalJSK' => $totalJSK,
             'codeNames' => $codeNames
         ];
     }

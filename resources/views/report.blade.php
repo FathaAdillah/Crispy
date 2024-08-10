@@ -143,55 +143,63 @@
                                     <br>
                                 </div>
                                 <div class="tab-pane" id="tabs-activity-8">
-                                    <h2>Harapan</h2>
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Code Name</th>
-                                                    <th>Total Sum per Code</th>
-                                                    <th>JSK</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($piecesHarapan['totalSumPerCodeId'] as $codeId => $totalSum)
+                                    <div class="mt-2">
+                                        <h2>Harapan</h2>
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <thead>
                                                     <tr>
-                                                        <td>{{ $piecesHarapan['codeNames'][$codeId] }}</td>
-                                                        <td>{{ $totalSum }}</td>
-                                                        <td>{{ number_format($piecesHarapan['JSK'][$codeId], 2) }}</td>
+                                                        <th>Code Name</th>
+                                                        <th>Total Sum per Code</th>
+                                                        <th>JSK</th>
                                                     </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($piecesHarapan['totalSumPerCodeId'] as $codeId => $totalSum)
+                                                        <tr>
+                                                            <td>{{ $piecesHarapan['codeNames'][$codeId] }}</td>
+                                                            <td>{{ $totalSum }}</td>
+                                                            <td>{{ number_format($piecesHarapan['JSK'][$codeId], 2) }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <br>
+                                        {{-- <p>Total RK :
+                                            {{ number_format($piecesKepuasan['totalJSK'], 2) }}</p> --}}
+                                        <p>Rata RK (Total RK / Jumlah Code): {{ number_format($piecesHarapan['RK'], 2) }}
+                                        </p>
                                     </div>
-                                    <p>RK: {{ number_format($piecesHarapan['RK'], 2) }}</p>
-                                    <p>RK per Code ID:
-                                        {{ number_format($piecesHarapan['RK'] / $piecesHarapan['codeCount'], 2) }}</p>
-
-                                    <h2>Kepuasan</h2>
-                                    <div class="table-responsive">
-                                        <table class="table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Code Name</th>
-                                                    <th>Total Sum per Code</th>
-                                                    <th>JSK</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach ($piecesKepuasan['totalSumPerCodeId'] as $codeId => $totalSum)
+                                    <div class="mt-10">
+                                        <h2>Kepuasan</h2>
+                                        <div class="table-responsive">
+                                            <table class="table">
+                                                <thead>
                                                     <tr>
-                                                        <td>{{ $piecesKepuasan['codeNames'][$codeId] }}</td>
-                                                        <td>{{ $totalSum }}</td>
-                                                        <td>{{ number_format($piecesKepuasan['JSK'][$codeId], 2) }}</td>
+                                                        <th>Code Name</th>
+                                                        <th>Total Sum per Code</th>
+                                                        <th>JSK</th>
                                                     </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($piecesKepuasan['totalSumPerCodeId'] as $codeId => $totalSum)
+                                                        <tr>
+                                                            <td>{{ $piecesKepuasan['codeNames'][$codeId] }}</td>
+                                                            <td>{{ $totalSum }}</td>
+                                                            <td>{{ number_format($piecesKepuasan['JSK'][$codeId], 2) }}
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <br>
+                                        {{-- <p>Total RK :
+                                            {{ number_format($piecesKepuasan['totalJSK'], 2) }}</p> --}}
+                                        <p>Rata RK (Total RK / Jumlah Code): {{ number_format($piecesKepuasan['RK'], 2) }}
+                                        </p>
                                     </div>
-                                    <p>RK: {{ number_format($piecesKepuasan['RK'], 2) }}</p>
-                                    <p>RK per Code ID:
-                                        {{ number_format($piecesKepuasan['RK'] / $piecesKepuasan['codeCount'], 2) }}</p>
                                 </div>
                             </div>
                         </div>
