@@ -24,11 +24,12 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/home', function () {
         return view('dashboard');
     })->name('home');
+    Route::get('/report/export-excel', [ReportController::class, 'exportExcel'])->name('report.export-excel');
     Route::resource('pertanyaan', PertanyaanController::class);
     Route::resource('variable', VariableController::class);
     Route::resource('responden', RespondenController::class);
     Route::resource('report', ReportController::class);
     Route::resource('code', CodeController::class);
     Route::resource('jawaban', AnswerController::class);
-    Route::get('/jawaban/{responden_id}', [AnswerController::class, 'show']);
+
 });
