@@ -11,6 +11,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "markrogoyski/math-php": "^2.10",
+        "phpoffice/phpspreadsheet": "^2.2",
         "takielias/tablar": "^11.8",
         "yajra/laravel-datatables-oracle": "^11.1"
     },
