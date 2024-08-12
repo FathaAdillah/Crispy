@@ -18,6 +18,11 @@
                         Report
                     </h2>
                 </div>
+                <div class="col-auto ms-auto d-print-none">
+                    <div class="btn-list">
+                        <a href="{{ route('report.export-excel') }}" class="btn btn-success">Export to Excel</a>
+                    </div>
+                </div>
                 <!-- Page title actions -->
                 <div class="col-12 mt-5">
                     <div class="card">

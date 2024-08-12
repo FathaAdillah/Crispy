@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use MathPHP\Statistics\Descriptive;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Writer\Csv;
+
 
 class ReportController extends Controller
 {
@@ -104,7 +108,6 @@ class ReportController extends Controller
             'totalCSI' => round($totalCSI, 2),
             'piecesHarapan' => $piecesHarapan,
             'piecesKepuasan' => $piecesKepuasan,
-            // 'piecesPerCode' => $piecesPerCode
         ]);
     }
 
@@ -358,48 +361,109 @@ class ReportController extends Controller
             'codeNames' => $codeNames
         ];
     }
+    public function exportExcel()
+    {
+        // Retrieve all unique responden IDs from both Harapan and Kepuasan
+        $respondenIds = DB::table('aanswer_harapan')
+            ->select('responden_id')
+            ->union(
+                DB::table('aanswer_kepuasan')->select('responden_id')
+            )
+            ->distinct()
+            ->pluck('responden_id')
+            ->toArray();
 
-    // private function hitungPIECES($dataHarapan, $dataKepuasan)
-    // {
-    //     $piecesPerCode = [];
+        // Retrieve and group the data from Harapan by code_name
+        $dataHarapan = DB::table('aanswer_harapan as ah')
+            ->select('ac.name as code_name', 'ah.responden_id', 'ah.jawaban1', 'ah.jawaban2', 'ah.jawaban3', 'ah.jawaban4', 'ah.jawaban5')
+            ->join('aquestion as q', 'ah.question_id', '=', 'q.id')
+            ->join('acode as ac', 'q.code_id', '=', 'ac.id')
+            ->get()
+            ->groupBy('code_name');
 
-    //     // Group data by variable and code_id
-    //     $groupedHarapan = $dataHarapan->groupBy(['variable_name', 'code_id']);
-    //     $groupedKepuasan = $dataKepuasan->groupBy(['variable_name', 'code_id']);
+        // Retrieve and group the data from Kepuasan by code_name
+        $dataKepuasan = DB::table('aanswer_kepuasan as ak')
+            ->select('ac.name as code_name', 'ak.responden_id', 'ak.jawaban1', 'ak.jawaban2', 'ak.jawaban3', 'ak.jawaban4', 'ak.jawaban5')
+            ->join('aquestion as q', 'ak.question_id', '=', 'q.id')
+            ->join('acode as ac', 'q.code_id', '=', 'ac.id')
+            ->get()
+            ->groupBy('code_name');
 
-    //     foreach ($groupedHarapan as $variableName => $codeGroups) {
-    //         foreach ($codeGroups as $codeId => $harapanData) {
-    //             if (isset($groupedKepuasan[$variableName][$codeId])) {
-    //                 $kepuasanData = $groupedKepuasan[$variableName][$codeId];
+        // Create a new Spreadsheet object
+        $spreadsheet = new Spreadsheet();
 
-    //                 $totalHarapan = $harapanData->count() * 5; // Assuming each question has 5 answers
-    //                 $totalKepuasan = $kepuasanData->count() * 5;
+        // Create Harapan sheet
+        $harapanSheet = $spreadsheet->createSheet();
+        $harapanSheet->setTitle('Harapan');
+        $harapanSheet->setCellValue('A1', 'Code Name');
 
-    //                 $sumHarapan = $harapanData->sum(function ($item) {
-    //                     return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
-    //                 });
+        // Create Kepuasan sheet
+        $kepuasanSheet = $spreadsheet->createSheet();
+        $kepuasanSheet->setTitle('Kepuasan');
+        $kepuasanSheet->setCellValue('A1', 'Code Name');
 
-    //                 $sumKepuasan = $kepuasanData->sum(function ($item) {
-    //                     return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
-    //                 });
+        // Define column ranges to support up to 100 respondents
+        $columns = [];
+        foreach (range('B', 'Z') as $column) {
+            $columns[] = $column;
+        }
+        foreach (range('A', 'Z') as $firstLetter) {
+            foreach (range('A', 'Z') as $secondLetter) {
+                $columns[] = $firstLetter . $secondLetter;
+            }
+        }
 
-    //                 // Cek untuk menghindari pembagian dengan nol
-    //                 if ($totalHarapan == 0 || $totalKepuasan == 0) {
-    //                     continue;
-    //                 }
+        // Set Responden IDs in header row for both sheets
+        foreach ($respondenIds as $index => $respondenId) {
+            if (isset($columns[$index])) {
+                $harapanSheet->setCellValue($columns[$index] . '1', $respondenId);
+                $kepuasanSheet->setCellValue($columns[$index] . '1', $respondenId);
+            }
+        }
 
-    //                 $meanHarapan = $sumHarapan / $totalHarapan;
-    //                 $meanKepuasan = $sumKepuasan / $totalKepuasan;
+        // Populate Harapan sheet with data
+        $row = 2;
+        foreach ($dataHarapan as $codeName => $responses) {
+            $harapanSheet->setCellValue('A' . $row, $codeName);
+            foreach ($responses as $response) {
+                $score = max($response->jawaban1, $response->jawaban2, $response->jawaban3, $response->jawaban4, $response->jawaban5);
+                if ($score > 0) {
+                    $columnIndex = array_search($response->responden_id, $respondenIds);
+                    if (isset($columns[$columnIndex])) {
+                        $harapanSheet->setCellValue($columns[$columnIndex] . $row, $score);
+                    }
+                }
+            }
+            $row++;
+        }
 
-    //                 $piecesPerCode[] = [
-    //                     'variable_name' => $variableName,
-    //                     'code_name' => $harapanData->first()->code_name,
-    //                     'mean_harapan' => round($meanHarapan, 2),
-    //                     'mean_kepuasan' => round($meanKepuasan, 2)
-    //                 ];
-    //             }
-    //         }
-    //     }
-    //     return $piecesPerCode;
-    // }
+        // Populate Kepuasan sheet with data
+        $row = 2;
+        foreach ($dataKepuasan as $codeName => $responses) {
+            $kepuasanSheet->setCellValue('A' . $row, $codeName);
+            foreach ($responses as $response) {
+                $score = max($response->jawaban1, $response->jawaban2, $response->jawaban3, $response->jawaban4, $response->jawaban5);
+                if ($score > 0) {
+                    $columnIndex = array_search($response->responden_id, $respondenIds);
+                    if (isset($columns[$columnIndex])) {
+                        $kepuasanSheet->setCellValue($columns[$columnIndex] . $row, $score);
+                    }
+                }
+            }
+            $row++;
+        }
+
+        // Set the active sheet to the first one
+        $spreadsheet->setActiveSheetIndex(0);
+
+        // Set the headers for the response
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="report.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        // Write the spreadsheet to the output stream
+        $writer = new Xlsx($spreadsheet);
+        $writer->save('php://output');
+        exit;
+    }
 }
