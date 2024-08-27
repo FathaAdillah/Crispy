@@ -49,7 +49,7 @@
                                         <tr>
                                             <th>ID</th>
                                             <th>Name</th>
-                                            <th>Email</th>
+                                            {{-- <th>Email</th> --}}
                                             <th>Pekerjaan</th>
                                             <th>Instansi</th>
                                             <th>Bukti</th>
@@ -82,10 +82,10 @@
                         data: 'name',
                         name: 'name'
                     },
-                    {
-                        data: 'email',
-                        name: 'email'
-                    },
+                    // {
+                    //     data: 'email',
+                    //     name: 'email'
+                    // },
                     {
                         data: 'pekerjaan',
                         name: 'pekerjaan'
