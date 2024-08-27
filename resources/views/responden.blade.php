@@ -54,7 +54,7 @@
                                             <th>Instansi</th>
                                             <th>Bukti</th>
                                             <th>Jenis Kelamin</th>
-                                            <th>Action</th>
+                                            {{-- <th>Action</th> --}}
                                         </tr>
                                     </thead>
                                 </table>
@@ -101,13 +101,13 @@
                     {
                         data: 'jenis_kelamin',
                         name: 'jenis_kelamin'
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        orderable: false,
-                        searchable: false
                     }
+                    // {
+                    //     data: 'action',
+                    //     name: 'action',
+                    //     orderable: false,
+                    //     searchable: false
+                    // }
                 ],
                 dom: 'lBfrtip',
                 buttons: [{

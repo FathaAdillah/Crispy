@@ -24,12 +24,12 @@ class RespondenController extends Controller
                         }
                         return 'No File';
                     })
-                    ->addColumn('action', function ($responden) {
-                        $Button = "<button class='btn btn-primary btn-edit' data-id='" . $responden->id . "'><i class='fas fa-edit'></i></button>";
-                        $Button .= " <button class='btn btn-danger btn-delete' data-id='" . $responden->id . "'><i class='fas fa-trash'></i></button>";
-                        return $Button;
-                    })
-                    ->rawColumns(['bukti', 'action'])
+                    // ->addColumn('action', function ($responden) {
+                    //     $Button = "<button class='btn btn-primary btn-edit' data-id='" . $responden->id . "'><i class='fas fa-edit'></i></button>";
+                    //     $Button .= " <button class='btn btn-danger btn-delete' data-id='" . $responden->id . "'><i class='fas fa-trash'></i></button>";
+                    //     return $Button;
+                    // })
+                    ->rawColumns(['bukti'])
                     ->make(true);
             }
         } catch (\Exception $e) {
