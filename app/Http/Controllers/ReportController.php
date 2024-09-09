@@ -102,6 +102,8 @@ class ReportController extends Controller
             'dataKepuasan' => $dataKepuasan,
             'allData' => $allData,
             'correlations' => $correlations,
+            // 'correlationsHarapan' => $correlationsHarapan,
+            // 'correlationsKepuasan' => $correlationsKepuasan,
             'alphaHarapan' => $alphaHarapan,
             'alphaKepuasan' => $alphaKepuasan,
             'csiPerVariable' => $csiPerVariable,
@@ -112,7 +114,7 @@ class ReportController extends Controller
     }
 
 
-    //Function Validitas
+    // Function Validitas
     public function calculateScoresV($data)
     {
         $scores = [];
@@ -132,6 +134,25 @@ class ReportController extends Controller
         }
         return $scores;
     }
+    // public function calculateScoresV($data)
+    // {
+    //     $scores = [];
+    //     foreach ($data as $item) {
+    //         $respondentId = $item->responden_id;
+    //         $codeId = $item->code_id;
+    //         $score = $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
+
+    //         if (!isset($scores[$respondentId])) {
+    //             $scores[$respondentId] = [];
+    //         }
+    //         if (!isset($scores[$respondentId][$codeId])) {
+    //             $scores[$respondentId][$codeId] = 0;
+    //         }
+
+    //         $scores[$respondentId][$codeId] += $score;
+    //     }
+    //     return $scores;
+    // }
 
     public function calculateCorrelation($scoresHarapan, $scoresKepuasan)
     {
@@ -167,6 +188,41 @@ class ReportController extends Controller
         }
         return $correlations;
     }
+
+    // public function calculateCorrelation($scoresHarapan, $scoresKepuasan)
+    // {
+    //     $correlations = [];
+    //     foreach ($scoresHarapan as $respondentId => $codes) {
+    //         foreach ($codes as $codeId => $scoreHarapan) {
+    //             if (isset($scoresKepuasan[$respondentId][$codeId])) {
+    //                 $scoreKepuasan = $scoresKepuasan[$respondentId][$codeId];
+
+    //                 $n = count($scoresHarapan);
+    //                 $sumX = array_sum(array_column($scoresHarapan, $codeId));
+    //                 $sumY = array_sum(array_column($scoresKepuasan, $codeId));
+    //                 $sumXY = 0;
+    //                 $sumX2 = 0;
+    //                 $sumY2 = 0;
+
+    //                 foreach ($scoresHarapan as $resId => $codes) {
+    //                     $x = $codes[$codeId];
+    //                     $y = $scoresKepuasan[$resId][$codeId];
+    //                     $sumXY += $x * $y;
+    //                     $sumX2 += $x * $x;
+    //                     $sumY2 += $y * $y;
+    //                 }
+
+    //                 $numerator = ($n * $sumXY) - ($sumX * $sumY);
+    //                 $denominator = sqrt(($n * $sumX2 - $sumX * $sumX) * ($n * $sumY2 - $sumY * $sumY));
+    //                 $correlation = ($denominator != 0) ? $numerator / $denominator : 0;
+
+    //                 // Store correlation coefficient without rounding
+    //                 $correlations[$codeId] = $correlation;
+    //             }
+    //         }
+    //     }
+    //     return $correlations;
+    // }
 
     //Function Uji Reabilitas
     public function calculateVarianceR($array)
@@ -251,6 +307,44 @@ class ReportController extends Controller
 
 
 
+    // private function hitungCSI($dataHarapan, $dataKepuasan)
+    // {
+    //     $csiPerVariable = [];
+
+    //     // Group data by variable
+    //     $groupedHarapan = $dataHarapan->groupBy('variable_id');
+    //     $groupedKepuasan = $dataKepuasan->groupBy('variable_id');
+
+    //     foreach ($groupedHarapan as $variableId => $harapanData) {
+    //         if (isset($groupedKepuasan[$variableId])) {
+    //             $kepuasanData = $groupedKepuasan[$variableId];
+
+    //             // Sum the Harapan (expectation) scores
+    //             $sumHarapan = $harapanData->sum(function ($item) {
+    //                 return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
+    //             });
+
+    //             // Sum the Kepuasan (satisfaction) scores
+    //             $sumKepuasan = $kepuasanData->sum(function ($item) {
+    //                 return $item->jawaban1 + $item->jawaban2 + $item->jawaban3 + $item->jawaban4 + $item->jawaban5;
+    //             });
+
+    //             // Avoid division by zero and calculate CSI
+    //             if ($sumHarapan > 0) {
+    //                 $csi = round(($sumKepuasan / $sumHarapan) * 100, 2);
+
+    //                 $csiPerVariable[] = [
+    //                     'variable_id' => $variableId,
+    //                     'variable_name' => $harapanData->first()->variable_name,
+    //                     'csi' => $csi
+    //                 ];
+    //             }
+    //         }
+    //     }
+
+    //     return $csiPerVariable;
+    // }
+
     //Function CSI
     private function hitungCSI($dataHarapan, $dataKepuasan)
     {
@@ -298,10 +392,10 @@ class ReportController extends Controller
                     'variable_id' => $variableId,
                     'variable_name' => $harapanData->first()->variable_name,
                     'mis' => round($meanHarapan, 2),
-                    'mss' => round($meanKepuasan, 2),
+                    'csi' => round($meanKepuasan*100, 2),
                     'wf' => round($wf, 2),
                     'ws' => round($ws, 2),
-                    'csi' => $csi
+                    'msi' => $csi
                 ];
             }
         }

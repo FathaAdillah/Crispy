@@ -107,6 +107,62 @@
                                         </table>
                                     </div>
                                 </div>
+                                {{-- <div class="tab-pane active show" id="tabs-home-7">
+                                    <h4>Uji Validitas</h4>
+                                    <div class="table-responsive">
+                                        <!-- Harapan Section -->
+                                        <h5>Harapan</h5>
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Code Name</th>
+                                                    <th>Correlation Coefficient</th>
+                                                    <th>Validity</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($correlationsHarapan as $codeId => $correlation)
+                                                    @php
+                                                        $codeNameHarapan =
+                                                            $dataHarapan->firstWhere('code_id', $codeId)->code_name ??
+                                                            'Unknown';
+                                                    @endphp
+                                                    <tr>
+                                                        <td>{{ $codeNameHarapan }}</td>
+                                                        <td>{{ $correlation }}</td>
+                                                        <td>{{ $correlation > 0.195 ? 'Valid' : 'Tidak Valid' }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+
+                                        <!-- Kepuasan Section -->
+                                        <h5>Kepuasan</h5>
+                                        <table class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Code Name</th>
+                                                    <th>Correlation Coefficient</th>
+                                                    <th>Validity</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($correlationsKepuasan as $codeId => $correlation)
+                                                    @php
+                                                        $codeNameKepuasan =
+                                                            $dataKepuasan->firstWhere('code_id', $codeId)->code_name ??
+                                                            'Unknown';
+                                                    @endphp
+                                                    <tr>
+                                                        <td>{{ $codeNameKepuasan }}</td>
+                                                        <td>{{ $correlation }}</td>
+                                                        <td>{{ $correlation > 0.195 ? 'Valid' : 'Tidak Valid' }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div> --}}
                                 <div class="tab-pane" id="tabs-profile-7">
                                     <h2>Reliability Testing</h2>
                                     <h3>Harapan</h3>
@@ -124,27 +180,27 @@
                                             <thead>
                                                 <tr>
                                                     <th>Variable Name</th>
-                                                    <th>MIS</th>
-                                                    <th>MSS</th>
-                                                    <th>WF</th>
-                                                    <th>WS</th>
+                                                    {{-- <th>MIS</th> --}}
+                                                    <th>CSI</th>
+                                                    {{-- <th>WF</th>
+                                                    <th>WS</th> --}}
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach ($csiPerVariable as $csi)
                                                     <tr>
                                                         <td>{{ $csi['variable_name'] }}</td>
-                                                        <td>{{ $csi['mis'] }}</td>
-                                                        <td>{{ $csi['mss'] }}</td>
-                                                        <td>{{ $csi['wf'] }}</td>
-                                                        <td>{{ $csi['ws'] }}</td>
+                                                        {{-- <td>{{ $csi['mis'] }}</td> --}}
+                                                        <td>{{ $csi['csi'] }}</td>
+                                                        {{-- <td>{{ $csi['wf'] }}</td>
+                                                        <td>{{ $csi['ws'] }}</td> --}}
                                                     </tr>
                                                 @endforeach
                                             </tbody>
                                         </table>
                                     </div>
                                     <br>
-                                    <h3>Total CSI: {{ $totalCSI }}</h3>
+                                    {{-- <h3>Total CSI: {{ $totalCSI }}</h3> --}}
                                     <br>
                                 </div>
                                 <div class="tab-pane" id="tabs-activity-8">
