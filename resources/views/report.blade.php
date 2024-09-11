@@ -169,7 +169,7 @@
                                     <p>Cronbach's Alpha: {{ $alphaHarapan }}</p>
                                     <p>Kesimpulan: {{ $alphaHarapan > 0.6 ? 'Reliable' : 'Tidak Reliable' }}</p>
 
-                                    <h3>Kepuasan</h3>
+                                    <h3>Kinerja</h3>
                                     <p>Cronbach's Alpha: {{ $alphaKepuasan }}</p>
                                     <p>Kesimpulan: {{ $alphaKepuasan > 0.6 ? 'Reliable' : 'Tidak Reliable' }}</p>
                                 </div>
