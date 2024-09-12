@@ -67,18 +67,22 @@ class ReportController extends Controller
         // Gabungkan dataHarapan dan dataKepuasan ke dalam satu array besar
         $allData = $dataHarapan->concat($dataKepuasan);
 
-        // Menghitung Uji Validitas
         $scoresHarapan = $this->calculateScoresV($dataHarapan);
         $scoresKepuasan = $this->calculateScoresV($dataKepuasan);
         $correlations = $this->calculateCorrelation($scoresHarapan, $scoresKepuasan);
 
+        // Pisahkan hasil korelasi untuk Harapan dan Kepuasan
+        $correlationsHarapan = $correlations['correlationsHarapan'];
+        $correlationsKepuasan = $correlations['correlationsKepuasan'];
+
+
         // Menghitung Cronbach's Alpha untuk jawaban harapan dan kepuasan
-        $scoresHarapan = $this->calculateScoresR($dataHarapan);
-        $scoresKepuasan = $this->calculateScoresR($dataKepuasan);
+        $scoresHarapanR = $this->calculateScoresR($dataHarapan);
+        $scoresKepuasanR = $this->calculateScoresR($dataKepuasan);
 
         // Menghitung Cronbach's Alpha
-        $alphaHarapan = $this->calculateCronbachAlphaR($scoresHarapan);
-        $alphaKepuasan = $this->calculateCronbachAlphaR($scoresKepuasan);
+        $alphaHarapan = $this->calculateCronbachAlphaR($scoresHarapanR);
+        $alphaKepuasan = $this->calculateCronbachAlphaR($scoresKepuasanR);
 
         // Hitung CSI per variable
         $csiPerVariable = $this->hitungCSI($dataHarapan, $dataKepuasan);
@@ -101,9 +105,9 @@ class ReportController extends Controller
             'dataHarapan' => $dataHarapan,
             'dataKepuasan' => $dataKepuasan,
             'allData' => $allData,
-            'correlations' => $correlations,
-            // 'correlationsHarapan' => $correlationsHarapan,
-            // 'correlationsKepuasan' => $correlationsKepuasan,
+            // 'correlations' => $correlations,
+            'correlationsHarapan' => $correlationsHarapan,
+            'correlationsKepuasan' => $correlationsKepuasan,
             'alphaHarapan' => $alphaHarapan,
             'alphaKepuasan' => $alphaKepuasan,
             'csiPerVariable' => $csiPerVariable,
@@ -149,79 +153,133 @@ class ReportController extends Controller
     //             $scores[$respondentId][$codeId] = 0;
     //         }
 
-    //         $scores[$respondentId][$codeId] += $score;
+    //         $scores[$respondentId][$codeId] += $score;`
     //     }
     //     return $scores;
     // }
 
-    public function calculateCorrelation($scoresHarapan, $scoresKepuasan)
-    {
-        $correlations = [];
-        foreach ($scoresHarapan as $respondentId => $codes) {
-            foreach ($codes as $codeId => $scoreHarapan) {
-                if (isset($scoresKepuasan[$respondentId][$codeId])) {
-                    $scoreKepuasan = $scoresKepuasan[$respondentId][$codeId];
+    public function calculateYTotal($scores) {
+        $YTotal = array();
+        $numRows = count($scores);
+        $numCols = isset($scores[0]) ? count($scores[0]) : 25;
 
-                    // Menghitung koefisien korelasi (Pearson correlation coefficient)
-                    $n = count($scoresHarapan);
-                    $sumX = array_sum(array_column($scoresHarapan, $codeId));
-                    $sumY = array_sum(array_column($scoresKepuasan, $codeId));
-                    $sumXY = 0;
-                    $sumX2 = 0;
-                    $sumY2 = 0;
-
-                    foreach ($scoresHarapan as $resId => $codes) {
-                        $x = $codes[$codeId];
-                        $y = $scoresKepuasan[$resId][$codeId];
-                        $sumXY += $x * $y;
-                        $sumX2 += $x * $x;
-                        $sumY2 += $y * $y;
-                    }
-
-                    $numerator = $n * $sumXY - $sumX * $sumY;
-                    $denominator = sqrt(($n * $sumX2 - $sumX * $sumX) * ($n * $sumY2 - $sumY * $sumY));
-                    $correlation = ($denominator != 0) ? $numerator / $denominator : 0;
-
-                    $correlations[$codeId] = $correlation;
+        // Sum across columns for each row
+        for ($row = 1; $row <= $numRows; $row++) { // Start from 0
+            $sum = 0;
+            for ($col = 1; $col <= $numCols; $col++) { // Start from 0
+                if (isset($scores[$row][$col])) { // Check if index exists
+                    $sum += $scores[$row][$col];
                 }
             }
+            $YTotal[] = $sum;
         }
-        return $correlations;
+        return $YTotal;
+    }
+
+    public function transformScoresArray($scores) {
+        $numRows = count($scores);
+        $numCols = isset($scores[0]) ? count($scores[0]) : 25;
+
+        // Initialize a new array to hold the combined results
+        $combinedArray = array();
+
+        // Loop through each column
+        for ($col = 1; $col <= $numCols; $col++) {
+            // Create an array to store values for this column
+            $columnValues = array();
+
+            // Loop through each row to get the values for this column
+            for ($row = 0; $row <= $numRows; $row++) {
+                if (isset($scores[$row][$col])) {
+                    // Append the value to the columnValues array
+                    $columnValues[] = $scores[$row][$col];
+                }
+            }
+
+            // Append the columnValues array to the combinedArray
+            $combinedArray[] = $columnValues;
+        }
+
+        return $combinedArray;
+    }
+
+    public function pearsonCorrelation($x, $y) {
+        $n = count($x);
+
+        if ($n != count($y)) {
+            return ("Arrays must have the same length.");
+        }
+
+        // Calculate means
+        $meanX = array_sum($x) / $n;
+        $meanY = array_sum($y) / $n;
+
+        // Calculate covariance and standard deviations
+        $covXY = 0;
+        $varX = 0;
+        $varY = 0;
+
+        for ($i = 0; $i < $n; $i++) {
+            $covXY += ($x[$i] - $meanX) * ($y[$i] - $meanY);
+            $varX += pow($x[$i] - $meanX, 2);
+            $varY += pow($y[$i] - $meanY, 2);
+        }
+
+        $covXY /= $n;
+        $varX = sqrt($varX / $n);
+        $varY = sqrt($varY / $n);
+
+        // Calculate Pearson correlation coefficient
+        $correlation = $covXY / ($varX * $varY);
+
+        return $correlation;
+    }
+
+    public function calculateCorrelation($scoresHarapan, $scoresKepuasan)
+    {
+        $computeCorrelations = function($scores) {
+            $XTransformed = $this->transformScoresArray($scores);
+            $YTotal = $this->calculateYTotal($scores);
+            return array_combine(
+                range(1, count($XTransformed)),
+                array_map(
+                    fn($x) => $this->pearsonCorrelation($x, $YTotal),
+                    $XTransformed
+                )
+            );
+        };
+
+        // Compute correlations for both Harapan and Kepuasan
+        $correlationsHarapan = $computeCorrelations->bindTo($this, $this)($scoresHarapan);
+        $correlationsKepuasan = $computeCorrelations->bindTo($this, $this)($scoresKepuasan);
+
+        return [
+            'correlationsHarapan' => $correlationsHarapan,
+            'correlationsKepuasan' => $correlationsKepuasan
+        ];
     }
 
     // public function calculateCorrelation($scoresHarapan, $scoresKepuasan)
     // {
-    //     $correlations = [];
-    //     foreach ($scoresHarapan as $respondentId => $codes) {
-    //         foreach ($codes as $codeId => $scoreHarapan) {
-    //             if (isset($scoresKepuasan[$respondentId][$codeId])) {
-    //                 $scoreKepuasan = $scoresKepuasan[$respondentId][$codeId];
 
-    //                 $n = count($scoresHarapan);
-    //                 $sumX = array_sum(array_column($scoresHarapan, $codeId));
-    //                 $sumY = array_sum(array_column($scoresKepuasan, $codeId));
-    //                 $sumXY = 0;
-    //                 $sumX2 = 0;
-    //                 $sumY2 = 0;
+    //     $XTransformed_Harapan = $this->transformScoresArray($scoresHarapan);
+    //     $YTotal_Harapan = $this->calculateYTotal($scoresHarapan);
+    //     $correlationsHarapan = array();
 
-    //                 foreach ($scoresHarapan as $resId => $codes) {
-    //                     $x = $codes[$codeId];
-    //                     $y = $scoresKepuasan[$resId][$codeId];
-    //                     $sumXY += $x * $y;
-    //                     $sumX2 += $x * $x;
-    //                     $sumY2 += $y * $y;
-    //                 }
-
-    //                 $numerator = ($n * $sumXY) - ($sumX * $sumY);
-    //                 $denominator = sqrt(($n * $sumX2 - $sumX * $sumX) * ($n * $sumY2 - $sumY * $sumY));
-    //                 $correlation = ($denominator != 0) ? $numerator / $denominator : 0;
-
-    //                 // Store correlation coefficient without rounding
-    //                 $correlations[$codeId] = $correlation;
-    //             }
-    //         }
+    //     for ($i = 0; $i < count($XTransformed_Harapan); $i++) {
+    //         $correlationsHarapan[$i + 1] = $this->pearsonCorrelation($XTransformed_Harapan[$i], $YTotal_Harapan);
     //     }
-    //     return $correlations;
+    //     $XTransformed_Kepuasan = $this->transformScoresArray($scoresKepuasan);
+    //     $YTotal_Kepuasan = $this->calculateYTotal($scoresKepuasan);
+    //     $correlationsKepuasan = array();
+
+    //     for ($i = 0; $i < count($XTransformed_Kepuasan); $i++) {
+    //         $correlationsKepuasan[$i + 1] = $this->pearsonCorrelation($XTransformed_Kepuasan[$i], $YTotal_Kepuasan);
+    //     }
+    //     return  [
+    //         'correlationsHarapan' => $correlationsHarapan,
+    //         'correlationsKepuasan' => $correlationsKepuasan
+    //     ];
     // }
 
     //Function Uji Reabilitas
@@ -392,7 +450,7 @@ class ReportController extends Controller
                     'variable_id' => $variableId,
                     'variable_name' => $harapanData->first()->variable_name,
                     'mis' => round($meanHarapan, 2),
-                    'csi' => round($meanKepuasan*100, 2),
+                    'csi' => round($meanKepuasan * 100, 2),
                     'wf' => round($wf, 2),
                     'ws' => round($ws, 2),
                     'msi' => $csi
