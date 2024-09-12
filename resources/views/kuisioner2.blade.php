@@ -206,6 +206,26 @@
                                         </div>
                                     </div>
                                     <div class="form-section mt-5">
+                                        <div class="container">
+                                            <h3>Keterangan Score:</h3>
+                                            <table class="table table-bordered">
+                                                <tr>
+                                                    <th>STS/STP</th>
+                                                    <th>TS/TP</th>
+                                                    <th>N</th>
+                                                    <th>S/P</th>
+                                                    <th>SS/SP</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>Sangat Tidak Setuju / Sangat Tidak Puas</td>
+                                                    <td>Tidak Setuju / Tidak Puas</td>
+                                                    <td>Netral</td>
+                                                    <td>Setuju / Puas</td>
+                                                    <td>Sangat Setuju / Sangat Puas</td>
+                                                </tr>
+                                            </table>
+                                        </div>
+                                        <br>
                                         <h2>Kuisioner <span class="text-danger">*</span></h2>
                                         <div class="container">
                                             <table class="table table-bordered">

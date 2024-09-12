@@ -105,7 +105,7 @@
                                                 @endforeach
                                             </tbody>
                                         </table>
-                                        <h4>Uji Validitas - Kepuasan</h4>
+                                        <h4>Uji Validitas - Kinerja</h4>
                                         <div class="table-responsive">
                                             <table class="table table-bordered">
                                                 <thead>
@@ -205,7 +205,7 @@
                                         </p>
                                     </div>
                                     <div class="mt-10">
-                                        <h2>Kepuasan</h2>
+                                        <h2>Keinerja</h2>
                                         <div class="table-responsive">
                                             <table class="table">
                                                 <thead>
